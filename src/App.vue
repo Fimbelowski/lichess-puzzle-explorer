@@ -1,33 +1,101 @@
 <script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import HelloWorld from '@/components/HelloWorld.vue';
+import {
+  computed,
+  ref,
+} from 'vue';
+
+import convertBytesToMb from '@/utilities/convertBytesToMb';
+
+const puzzlesSize = ref(0);
+const isLoadingPuzzlesMetadata = ref(false);
+const isLoadingPuzzles = ref(false);
+
+const puzzlesSizeInMb = computed(() => convertBytesToMb(puzzlesSize.value));
+
+function loadPuzzlesMetadata() {
+  isLoadingPuzzlesMetadata.value = true;
+
+  const puzzlesMetadata = new XMLHttpRequest();
+  puzzlesMetadata.open('HEAD', './src/assets/puzzles.csv');
+  puzzlesMetadata.onload = () => {
+    puzzlesSize.value = parseInt(puzzlesMetadata.getResponseHeader('content-length') || '0', 10);
+    isLoadingPuzzlesMetadata.value = false;
+  };
+
+  puzzlesMetadata.send();
+}
+
+async function loadPuzzles() {
+  isLoadingPuzzles.value = true;
+
+  const puzzles = new XMLHttpRequest();
+  puzzles.open('GET', './src/assets/puzzles.csv');
+  puzzles.onload = () => {
+    const response = puzzles.response as string;
+    const arr = response
+      .split('\n')
+      .map((line) => {
+        const [
+          puzzleId,
+          fen,
+          moves,
+          rating,
+          ratingDeviation,
+          popularity,
+          nbPlays,
+          themes,
+          gameUrl,
+          openingFamily,
+          openingVariation,
+        ] = line.split(',');
+
+        return {
+          fen,
+          gameUrl,
+          moves,
+          nbPlays,
+          openingFamily,
+          openingVariation,
+          popularity,
+          puzzleId,
+          rating,
+          ratingDeviation,
+          themes,
+        };
+      });
+    console.log(arr);
+    isLoadingPuzzles.value = false;
+  };
+
+  puzzles.send();
+}
+
+loadPuzzlesMetadata();
 </script>
 
 <template>
-  <div>
-    <a
-      href="https://vitejs.dev"
-      target="_blank"
+  <p
+    v-if="isLoadingPuzzlesMetadata"
+  >
+    Loading Puzzles Metadata...
+  </p>
+  <div
+    v-else
+  >
+    <p>
+      The total size of all puzzles is: {{ puzzlesSizeInMb }} MB
+    </p>
+    <button
+      @click="loadPuzzles"
     >
-      <img
-        src="/vite.svg"
-        class="logo"
-        alt="Vite logo"
-      >
-    </a>
-    <a
-      href="https://vuejs.org/"
-      target="_blank"
+      Load All Puzzles
+    </button>
+    <p
+      v-if="isLoadingPuzzles"
     >
-      <img
-        src="./assets/vue.svg"
-        class="logo vue"
-        alt="Vue logo"
-      >
-    </a>
+      Loading Puzzles...
+    </p>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
 <style scoped>
