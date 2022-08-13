@@ -61,6 +61,11 @@ module.exports = {
       ],
       'newlines-between': 'always',
     }],
+    'no-console': ['error', {
+      allow: [
+        'error',
+      ],
+    }],
     'object-curly-newline': ['error', {
       ImportDeclaration: {
         minProperties: 2,
