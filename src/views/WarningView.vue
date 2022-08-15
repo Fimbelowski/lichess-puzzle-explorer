@@ -6,6 +6,7 @@ import {
 
 import CheckboxInput from '@/components/CheckboxInput.vue';
 import convertBytesToMb from '@/utilities/convertBytesToMb';
+import convertPuzzleStringToObject from '@/utilities/convertPuzzleStringToObject';
 import Puzzle from '@/types/Puzzle';
 
 const isLoadingPuzzlesMetadata = ref(false);
@@ -80,35 +81,7 @@ async function loadPuzzles() {
       puzzles.value = result
         .split('\n')
         .filter((puzzleString) => puzzleString !== '')
-        .map((puzzleString) => {
-          const [
-            puzzleId,
-            fen,
-            moves,
-            rating,
-            ratingDeviation,
-            popularity,
-            plays,
-            themes,
-            gameUrl,
-            openingFamily,
-            openingVariation,
-          ] = puzzleString.split(',');
-
-          return {
-            fen,
-            gameUrl,
-            moves: moves.split(' ').length,
-            openingFamily: openingFamily || undefined,
-            openingVariation,
-            plays: parseInt(plays, 10),
-            popularity: parseInt(popularity, 10),
-            puzzleId,
-            rating: parseInt(rating, 10),
-            ratingDeviation: parseInt(ratingDeviation, 10),
-            themes: themes.split(' '),
-          };
-        });
+        .map(convertPuzzleStringToObject);
 
       isLoadingPuzzles.value = false;
       clearInterval(intervalId);
