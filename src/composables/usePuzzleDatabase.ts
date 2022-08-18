@@ -5,7 +5,7 @@ import {
 
 const DATABASE_NAME = 'puzzles';
 const DATABASE_VERSION = 1;
-// const OBJECT_STORE_NAME = 'puzzles';
+const OBJECT_STORE_NAME = 'puzzles';
 
 export default function usePuzzleDatabase() {
   const database = ref<IDBDatabase>();
@@ -33,6 +33,20 @@ export default function usePuzzleDatabase() {
     // existing one.
     const target = event.target as IDBOpenDBRequest;
     database.value = target.result;
+
+    const objectStore = database.value.createObjectStore(OBJECT_STORE_NAME, { keyPath: 'puzzleId' });
+
+    // Create indices
+    objectStore.createIndex('fen', 'fen', { unique: true });
+    objectStore.createIndex('moves', 'moves', { unique: false, multiEntry: false });
+    objectStore.createIndex('rating', 'rating', { unique: false });
+    objectStore.createIndex('ratingDeviation', 'ratingDeviation', { unique: false });
+    objectStore.createIndex('popularity', 'popularity', { unique: false });
+    objectStore.createIndex('plays', 'plays', { unique: false });
+    objectStore.createIndex('themes', 'themes', { unique: false, multiEntry: true });
+    objectStore.createIndex('gameUrl', 'gameUrl', { unique: true });
+    objectStore.createIndex('openingFamily', 'openingFamily', { unique: false });
+    objectStore.createIndex('openingVariation', 'openingVariation', { unique: false });
   };
 
   return {
