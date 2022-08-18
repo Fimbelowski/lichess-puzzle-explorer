@@ -1,7 +1,7 @@
 export default interface Puzzle {
   puzzleId: string;
   fen: string;
-  moves: number;
+  moves: string[];
   rating: number;
   ratingDeviation: number;
   popularity: number;

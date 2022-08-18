@@ -18,7 +18,7 @@ export default function convertPuzzleStringToObject(puzzleString: string): Puzzl
   return {
     fen,
     gameUrl,
-    moves: moves.split(' ').length,
+    moves: moves.split(' '),
     openingFamily: openingFamily || undefined,
     openingVariation,
     plays: parseInt(plays, 10),
