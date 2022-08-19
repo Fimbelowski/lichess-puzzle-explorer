@@ -1,21 +1,36 @@
 <script setup lang="ts">
-import usePuzzleDatabase from '@/composables/usePuzzleDatabase';
+import { ref } from 'vue';
 
-const puzzleDatabase = usePuzzleDatabase();
+import usePuzzleDatabaseStatus from '@/store/usePuzzleDatabaseStatus';
+
+const databaseStatus = usePuzzleDatabaseStatus();
+
+const isLoading = ref(false);
+
+const isError = ref(false);
+const errorMessage = ref('');
+
+databaseStatus.onError = (error) => {
+  console.error(error);
+
+  isError.value = true;
+  errorMessage.value = `Database error: ${error}`;
+  isLoading.value = false;
+};
 </script>
 
 <template>
-  <router-view
-    v-if="puzzleDatabase.databaseExists"
-  />
   <p
-    v-else-if="puzzleDatabase.isError"
-  >
-    {{ puzzleDatabase.errorMessage }}
-  </p>
-  <p
-    v-else
+    v-if="isLoading"
   >
     Loading database...
   </p>
+  <p
+    v-else-if="isError"
+  >
+    {{ errorMessage }}
+  </p>
+  <router-view
+    v-else
+  />
 </template>
