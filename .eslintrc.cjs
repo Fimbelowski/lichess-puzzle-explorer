@@ -75,6 +75,9 @@ module.exports = {
       allowSeparatedGroups: true,
       ignoreCase: true,
     }],
+    '@typescript-eslint/no-use-before-define': ['error', {
+      functions: false,
+    }],
   },
   settings: {
     'import/parsers': {
