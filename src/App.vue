@@ -1,22 +1,24 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-import usePuzzleDatabaseStatus from '@/store/usePuzzleDatabaseStatus';
+import usePuzzleDatabase from './composables/usePuzzleDatabase';
 
-const databaseStatus = usePuzzleDatabaseStatus();
+const router = useRouter();
+const puzzleDatabase = usePuzzleDatabase();
 
 const isLoading = ref(false);
 
-const isError = ref(false);
-const errorMessage = ref('');
+puzzleDatabase
+  .isReady()
+  .then((isReady) => {
+    if (isReady) {
+      isLoading.value = false;
+      return;
+    }
 
-databaseStatus.onError = (error) => {
-  console.error(error);
-
-  isError.value = true;
-  errorMessage.value = `Database error: ${error}`;
-  isLoading.value = false;
-};
+    router.replace('/warning');
+  });
 </script>
 
 <template>
@@ -24,11 +26,6 @@ databaseStatus.onError = (error) => {
     v-if="isLoading"
   >
     Loading database...
-  </p>
-  <p
-    v-else-if="isError"
-  >
-    {{ errorMessage }}
   </p>
   <router-view
     v-else

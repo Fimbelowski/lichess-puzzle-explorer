@@ -1,39 +1,25 @@
-import useIndexedDb from './useIndexedDb';
+import { openDB } from 'idb';
 
 const DATABASE_NAME = 'puzzles';
 const DATABASE_VERSION = 1;
 const OBJECT_STORE_NAME = 'puzzles';
+const EXPECTED_RECORD_COUNT = 2904421;
 
 export default function usePuzzleDatabase() {
-  const indexedDb = useIndexedDb();
-
   async function isReady() {
-    if (!objectStoreExists()) {
-      // Create object store/indices
+    const database = await openDB(DATABASE_NAME, DATABASE_VERSION, {
+      upgrade() {
+        return false;
+      },
+    });
 
-      return false;
-    }
+    const transaction = database.transaction(OBJECT_STORE_NAME);
+    const count = await transaction.objectStore(OBJECT_STORE_NAME).count();
 
-    // Check to see if the object store contains the expected number of entries
-    await indexedDb.transaction(OBJECT_STORE_NAME);
-
-    return false;
-  }
-
-  function objectStoreExists() {
-    if (indexedDb.database.value === undefined) {
-      return false;
-    }
-
-    return indexedDb.database.value.objectStoreNames.contains(OBJECT_STORE_NAME);
-  }
-
-  function open() {
-    return indexedDb.open(DATABASE_NAME, DATABASE_VERSION);
+    return count === EXPECTED_RECORD_COUNT;
   }
 
   return {
     isReady,
-    open,
   };
 }
